@@ -25,6 +25,6 @@ profileRouter.patch("/profile/update", userAuth, async (req, res) => {
     } catch (error) {
         res.send("ERROR : " + error.message);
     }
-})
+});
 module.exports = profileRouter;
 
