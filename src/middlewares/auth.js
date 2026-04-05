@@ -11,7 +11,7 @@ const userAuth = async (req, res, next) => {
         const decoded = JWT.verify(token, "MyServerSecret@003");
         const Id = decoded.id;
         const fetchedUser = await User.findById(Id);
-        if (!fetchedUser)
+        if (!fetchedUser )
             return res.status(404).json({ error: "User not found!" });
         req.user = fetchedUser;
         next();

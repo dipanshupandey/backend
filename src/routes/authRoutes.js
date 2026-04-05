@@ -4,6 +4,7 @@ const bcrypt=require("bcrypt");
 const validator=require("validator");
 const  User=require("../models/user");
 const {validateSignUp}=require("../utils/validation");
+
 authRouter.post("/user/signup",async (req, res) => {
     try {
         validateSignUp(req);
@@ -59,5 +60,7 @@ try {
     res.status(500).send("something went wrong! ",error.message);
 }
 });
+
+
 
 module.exports=authRouter;
