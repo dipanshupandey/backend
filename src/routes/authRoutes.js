@@ -52,12 +52,12 @@ authRouter.post("/user/login", async (req, res) => {
 
 authRouter.post("/user/logout",(req,res)=>{
 try {
-    res.cookie("token", token,{
+    res.cookie("token", "",{
             maxAge :7*24*60*60*1000*0      
         });
     res.send("logout success!");
 } catch (error) {
-    res.status(500).send("something went wrong! ",error.message);
+    res.status(500).send({message:"something went wrong! ",error:error.message});
 }
 });
 

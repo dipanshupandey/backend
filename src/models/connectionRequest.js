@@ -18,5 +18,12 @@ const connectionRequestSchema=new Schema({
 {
 timestamps:true
 });
+connectionRequestSchema.pre("save",function(){
+    const connectionRequest=this;
+    if(connectionRequest.fromId.equals(connectionRequest.toId))
+    {
+        throw new Error("Cant send request to self!");
+    }
+})
 const connectionRequestModel=mongoose.model("ConnectionRequest",connectionRequestSchema);
 module.exports=connectionRequestModel;

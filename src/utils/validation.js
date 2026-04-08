@@ -76,10 +76,7 @@ async function validateRequest(fromId, toId, status) {
     if (status != "interested" && status != "skipped") {
         throw new Error("Invalid status");
     }
-    if(fromId.toString()===toId.toString())
-    {
-        throw new Error("Self request not allowed!")
-    }
+   
     const existingRequest = await connectionRequestModel.findOne({$or:[
         { fromId, toId },
         { fromId: toId, toId: fromId }

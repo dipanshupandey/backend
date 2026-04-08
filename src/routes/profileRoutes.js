@@ -4,7 +4,6 @@ const userAuth = require("../middlewares/auth");
 const {validateUpdateProfile}=require("../utils/validation");
 
 profileRouter.get("/profile", userAuth, async (req, res) => {
-    console.log(req.cookies);
     res.send(req.user);
 });
 
