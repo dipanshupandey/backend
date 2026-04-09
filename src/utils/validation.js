@@ -81,6 +81,8 @@ async function validateRequest(fromId, toId, status) {
         { fromId, toId },
         { fromId: toId, toId: fromId }
     ]});
+    // console.log(JSON.stringify(existingRequest, null, 2));
+
     if (existingRequest) {
         throw new Error("Duplicate request");
     }

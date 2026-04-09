@@ -18,6 +18,7 @@ const connectionRequestSchema=new Schema({
 {
 timestamps:true
 });
+connectionRequestSchema.index({fromId:1,toId:1});
 connectionRequestSchema.pre("save",function(){
     const connectionRequest=this;
     if(connectionRequest.fromId.equals(connectionRequest.toId))
