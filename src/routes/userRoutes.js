@@ -1,22 +1,43 @@
-const express=require("express");
-const userRouter=express.Router();
-const userAuth=require("../middlewares/auth");
-const connectionRequestModel=require("../models/connectionRequest");
+const express = require("express");
+const userRouter = express.Router();
+const userAuth = require("../middlewares/auth");
+const connectionRequestModel = require("../models/connectionRequest");
 
-userRouter.get("/user/requests/interested",userAuth,async (req,res)=>{
+userRouter.get("/user/requests/interested", userAuth, async (req, res) => {
     try {
-        const user=req.user;
-        const requests=await connectionRequestModel.find({
-            toId:user._id,
-            status:"interested"
-        }).populate("fromId",["firstName","lastName","age","gender","about","skills","photoURL"]);
-        if(!requests)
-            return res.status(400).json({message:"Request not found!"});
+        const user = req.user;
+        const requests = await connectionRequestModel.find({
+            toId: user._id,
+            status: "interested"
+        }).populate("fromId", ["firstName", "lastName", "age", "gender", "about", "skills", "photoURL"]);
+        if (!requests)
+            return res.status(400).json({ message: "Request not found!" });
         res.send(requests);
     } catch (error) {
-        res.status(400).json({message:"something went wrong",error:error.message});
+        res.status(400).json({ message: "something went wrong", error: error.message });
     }
-})
+});
 
-module.exports= userRouter
+userRouter.get("/user/connections", userAuth, async (req, res) => {
+    try {
+        const user=req.user;
+        const connections=await connectionRequestModel.find({
+            $or:[
+                {fromId:user._id},
+                {toId:user._id}
+            ],
+            status:"matched"
+        }).populate("fromId",["firstName", "lastName", "age", "gender", "about", "skills", "photoURL"]);
+        const data=connections.map(connection=>connection.fromId);
+        // res.send(data);
+        return res.json({data:data});
+    } catch (error) {
+        return res.status(500).json({
+            message:"Something went wrong!",
+            error:error.message
+        });
+    }
+});
+
+module.exports = userRouter
 
