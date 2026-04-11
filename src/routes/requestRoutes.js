@@ -49,7 +49,7 @@ requestRouter.post("/request/review/:status/:requestId",userAuth,async (req,res)
     }
     requestObject.status=status;
     await requestObject.save();
-    return res.json({message:"request review successfull!",data:requestObject});
+    return res.json({message:`request ${status}!`,data:requestObject});
     } catch (error) {
         return res.status(500).send(error.message);
     }

@@ -5,13 +5,14 @@ const cookieParser = require("cookie-parser");
 const requestRouter=require("./routes/requestRoutes");
 const profileRouter=require("./routes/profileRoutes");
 const authRouter = require("./routes/authRoutes");
+const userRouter= require("./routes/userRoutes");
 
 app.use(express.json());
 app.use(cookieParser());
 app.use("/",authRouter);
 app.use("/",profileRouter);
 app.use("/",requestRouter);
-
+app.use("/",userRouter);
 
  
 connectDB().then(() => {
