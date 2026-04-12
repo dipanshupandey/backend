@@ -27,10 +27,10 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
                 {toId:user._id}
             ],
             status:"matched"
-        }).populate("fromId",["firstName", "lastName", "age", "gender", "about", "skills", "photoURL"]);
+        }).populate("fromId",["firstName", "lastName", "age", "gender", "about", "skills", "photoURL"]).populate("toId");
         const data=connections.map(connection=>connection.fromId);
         // res.send(data);
-        return res.json({data:data});
+        return res.json({data:connections});
     } catch (error) {
         return res.status(500).json({
             message:"Something went wrong!",
