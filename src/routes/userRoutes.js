@@ -43,7 +43,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 userRouter.get("/user/feed", userAuth,async (req, res) => {
     try {
         const user=req.user;
-        let hiddenUsers = [];
+        const hiddenUsers = new Set();
         const connections = await connectionRequestModel.find(
             {
                 $or: [
@@ -52,13 +52,21 @@ userRouter.get("/user/feed", userAuth,async (req, res) => {
                 ]
             }).select(["fromId","toId"]);
 
-        const connectionsIds=connections.map((item)=>item.fromId.equals(user._id)?item.toId:item.fromId);
-        hiddenUsers=[...connectionsIds,user._id];
-        const feed=await userModel.find({_id:{$nin:hiddenUsers}}).select(["firstName","lastName","age","about","gender","skills"]);
+        connections.forEach((item)=>{
+            hiddenUsers.add(item.fromId.toString());
+            hiddenUsers.add(item.toId.toString());
+        });
+
+        const feed=await userModel.find({
+            $and:[
+                {_id:{$nin:Array.from(hiddenUsers)}},
+                {_id:{$ne:user._id}}
+            ]
+        }).select(["firstName","lastName","age","about","gender","skills"]);
         
         return res.send(feed);
     } catch (error) {
-        return res.status(400).json({ message: "something went wrong!" ,  error: error });
+        return res.status(400).json({ message: "something went wrong!" ,  error: error.message });
     }
 });
 
