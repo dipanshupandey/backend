@@ -42,6 +42,27 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 
 userRouter.get("/user/feed", userAuth,async (req, res) => {
     try {
+        let page=parseInt(req.query.page)||1;
+        let limitProfile=parseInt(req.query.limit)||10;
+        if(page<0)
+        {
+            return res.status(401).json({
+                message:"Page should be a positive number!",
+            });
+        }
+        if(limitProfile>10||limitProfile<=0)
+        {
+            limitProfile=10;
+        }
+        if(page===0)
+        {
+            page=1;
+        }
+        if(page>100)
+        {
+            return res.status(400).json({message:"Page limit exceeded!"});
+        }
+        const profileSkip=(page-1)*limitProfile;
         const user=req.user;
         const hiddenUsers = new Set();
         const connections = await connectionRequestModel.find(
@@ -62,7 +83,7 @@ userRouter.get("/user/feed", userAuth,async (req, res) => {
                 {_id:{$nin:Array.from(hiddenUsers)}},
                 {_id:{$ne:user._id}}
             ]
-        }).select(["firstName","lastName","age","about","gender","skills"]);
+        }).select(["firstName","lastName","age","about","gender","skills"]).skip(profileSkip).limit(limitProfile);
         
         return res.send(feed);
     } catch (error) {
