@@ -45,7 +45,9 @@ authRouter.post("/user/login", async (req, res) => {
         res.cookie("token", token,{
             maxAge:7*24*60*60*1000        
         });
-        res.send("Login successfull");
+        const userObject=user.toObject();
+        delete userObject.password
+        res.send({message:"Login successfull",data:userObject});
     } catch (error) {
         res.status(400).send("Error : " + error.message);
     }
