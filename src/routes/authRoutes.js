@@ -30,7 +30,7 @@ authRouter.post("/user/login", async (req, res) => {
         }
         if (!validator.isEmail(email))
             throw new Error("Email format not accepted");
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).select("+password");
         // console.log(user);
         if (!user) {
             throw new Error("Wrong credentials");
@@ -47,9 +47,9 @@ authRouter.post("/user/login", async (req, res) => {
         });
         const userObject=user.toObject();
         delete userObject.password
-        res.send({message:"Login successfull",data:userObject});
+        return res.json({message:"Login successfull",data:user});
     } catch (error) {
-        res.status(400).send("Error : " + error.message);
+        res.status(401).send("Error : " + error.message);
     }
 });
 

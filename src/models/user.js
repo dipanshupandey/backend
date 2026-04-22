@@ -53,7 +53,8 @@ const userSchema = new Schema({
                 return validator.isStrongPassword(value);
             },
             message: "Password too weak"
-        }
+        },
+        select:false
     },
     about: {
         type: String,
