@@ -49,7 +49,10 @@ authRouter.post("/user/login", async (req, res) => {
         delete userObject.password
         return res.json({message:"Login successfull",data:user});
     } catch (error) {
-        res.status(401).send("Error : " + error.message);
+        res.status(401).json({
+            message:"invalid credentials",
+            error:error
+        });
     }
 });
 
