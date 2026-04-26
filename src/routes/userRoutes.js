@@ -83,7 +83,7 @@ userRouter.get("/user/feed", userAuth,async (req, res) => {
                 {_id:{$nin:Array.from(hiddenUsers)}},
                 {_id:{$ne:user._id}}
             ]
-        }).select(["firstName","lastName","age","about","gender","skills"]).skip(profileSkip).limit(limitProfile);
+        }).select(["firstName","lastName","age","about","gender","skills","photoURL"]).skip(profileSkip).limit(limitProfile);
         
         return res.send(feed);
     } catch (error) {
