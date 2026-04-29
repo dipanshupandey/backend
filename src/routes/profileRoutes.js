@@ -4,15 +4,16 @@ const userAuth = require("../middlewares/auth");
 const {validateUpdateProfile}=require("../utils/validation");
 
 profileRouter.get("/profile", userAuth, async (req, res) => {
-    
+    console.log("profile");
     res.send(req.user);
 });
 
 profileRouter.patch("/profile/update", userAuth, async (req, res) => {
     try {
+        // console.log(req);
         validateUpdateProfile(req);
         const loggedInUser = req.user;
-        console.log(loggedInUser);
+        // console.log(loggedInUser);
         Object.keys(req.body).forEach((key) => {
             loggedInUser[key] = req.body[key];
         });
