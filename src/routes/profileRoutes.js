@@ -14,6 +14,7 @@ profileRouter.patch("/profile/update", userAuth, async (req, res) => {
         validateUpdateProfile(req);
         const loggedInUser = req.user;
         // console.log(loggedInUser);
+       
         Object.keys(req.body).forEach((key) => {
             loggedInUser[key] = req.body[key];
         });
@@ -24,7 +25,10 @@ profileRouter.patch("/profile/update", userAuth, async (req, res) => {
         });
 
     } catch (error) {
-        res.send("ERROR : " + error.message);
+         res.status(400).json({
+        message:error.message,
+        error: error
+        });
     }
 });
 module.exports = profileRouter;

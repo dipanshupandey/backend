@@ -33,6 +33,7 @@ function validateSignUp(req) {
 
 
 function validateUpdateProfile(req) {
+  
     const allowedFields = ["firstName", "lastName", "about", "photoURL", "skills"];
     const updates = Object.keys(req.body);
 
@@ -51,7 +52,7 @@ function validateUpdateProfile(req) {
     if (firstName && firstName.trim().length < 2) {
         throw new Error("First name must be at least 2 characters long");
     }
-
+    
 
     if (lastName && lastName.trim().length < 2) {
         throw new Error("Last name must be at least 2 characters long");
@@ -68,7 +69,7 @@ function validateUpdateProfile(req) {
     }
 
 
-    if (skills.length > 10) {
+    if (skills&&skills.length > 10) {
         throw new Error("Skills can't be more than 10");
     }
 }
