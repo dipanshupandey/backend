@@ -3,7 +3,7 @@ const connectionRequestModel = require("../models/connectionRequest");
 const User = require("../models/user");
 
 function validateSignUp(req) {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password ,age} = req.body;
 
     if (!firstName || firstName.trim().length < 2) {
         throw new Error("First name must be at least 2 characters long");
@@ -24,6 +24,8 @@ function validateSignUp(req) {
     if (!password) {
         throw new Error("Password is required");
     }
+    if(!age)
+        throw new Error("Age is required");
     if (!validator.isStrongPassword(password)) {
         throw new Error(
             "Password must be strong (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 symbol)"

@@ -13,9 +13,20 @@ authRouter.post("/user/signup",async (req, res) => {
         console.log(hashedPassword);
         const newUser = new User({ firstName, lastName, email, password: hashedPassword, age, gender });
         await newUser.save();
-        res.send("user created successfully;");
+   
+        const token=newUser.getJWT();
+        res.cookie("token",token,{
+            maxAge:7*24*60*60*1000
+        });
+        res.status(200).json({
+            message:"User created successfully",
+            data:newUser
+        });
     } catch (error) {
-        res.status(400).send("user creation failed " + error);
+        res.status(400).send({
+      message: "User creation failed",
+      error: error.message,
+    });
     }
 
 });

@@ -31,6 +31,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         }).populate("fromId", ["firstName", "lastName", "age", "gender", "about", "skills", "photoURL"]).populate("toId", ["firstName", "lastName", "age", "gender", "about", "skills", "photoURL"]);
         const data = connections.map(connection => connection.fromId._id.equals(user._id) ? connection.toId : connection.fromId);
         // res.send(data);
+     
         return res.json({ data: data });
     } catch (error) {
         return res.status(500).json({
