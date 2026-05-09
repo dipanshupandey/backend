@@ -30,6 +30,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 });
 
 requestRouter.post("/request/review/:status/:requestId",userAuth,async (req,res)=>{
+    
     try {
     const allowedStatuses=["rejected","matched","block"];
     const status=req.params.status;
@@ -38,15 +39,18 @@ requestRouter.post("/request/review/:status/:requestId",userAuth,async (req,res)
     {
         return res.status(400).json({message:"invalid status"});
     }
+    
     const requestObject=await connectionRequestModel.findOne({
         _id:requestId,
         status:"interested",
         toId:req.user._id
     });
+    
     if(!requestObject)
     {
         return res.status(400).json({message:"Invalid request!"});
     }
+    
     requestObject.status=status;
     await requestObject.save();
     return res.json({message:`request ${status}!`,data:requestObject});
