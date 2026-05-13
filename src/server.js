@@ -7,6 +7,7 @@ const profileRouter=require("./routes/profileRoutes");
 const authRouter = require("./routes/authRoutes");
 const userRouter= require("./routes/userRoutes");
 const conversationRouter=require("./routes/conversationRoutes");
+const messageRoutes=require("./routes/messageRoutes");
 const cors=require("cors");
 
 app.use(cors({
@@ -21,6 +22,7 @@ app.use("/",profileRouter);
 app.use("/",requestRouter);
 app.use("/",userRouter);
 app.use("/",conversationRouter);
+app.use("/",messageRoutes);
 
  
 connectDB().then(() => {
