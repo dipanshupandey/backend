@@ -85,4 +85,21 @@ conversationRouter.post('/conversation/create',userAuth,async (req,res)=>{
         });
     }
 })
+
+conversationRouter.get('/conversation',userAuth,async(req,res)=>{
+    try {
+        const conversations=await Conversation.find({
+            participants:req.user._id,
+        }).populate("participants","firstName lastName photoURL").sort({lastMessageAt:-1});
+        res.status(200).json({
+            message:"Conversations fetched successfully",
+            data:conversations
+        });
+    } catch (error) {
+        return res.status(400).json({
+            message:"Conversations fetch failed!",
+            error:error.message
+        });
+    }
+})
 module.exports=conversationRouter;
