@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const Conversation = require("../models/conversation");
 const Message = require("../models/message");
+const message = require('../models/message');
 
 
 async function validateMessageRequest(conversationId, senderId, text) {
@@ -32,16 +33,16 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
         const { conversationId } = req.params;
         const senderId = req.user._id;
 
-        const conversation=await validateMessageRequest(conversationId, senderId, text);
+        const conversation = await validateMessageRequest(conversationId, senderId, text);
         const data = await Message.create({
             text,
             senderId,
             conversationId
         });
 
-      
-        conversation.lastMessage=text;
-        conversation.lastMessageAt=Date.now();
+
+        conversation.lastMessage = text;
+        conversation.lastMessageAt = Date.now();
         await conversation.save();
         return res.status(201).json({
             message: "Message sent",
@@ -56,4 +57,35 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
     }
 });
 
+messageRoutes.get('/api/conversations/:conversationId/messages', userAuth, async (req, res) => {
+    try {
+        const {conversationId} = req.params;
+        const userId=req.user._id;
+        if (!conversationId || !ObjectId.isValid(conversationId)) {
+            throw new Error("Conversation not valid!");
+        }
+        const conversation = await Conversation.findById(conversationId);
+        if (!conversation) {
+            throw new Error("No conversation!");
+        }
+        const isParticipant=conversation.participants.some((participant)=>participant.equals(userId));
+        if(!isParticipant)
+        {
+            throw new Error("Unauthorized!");
+        }
+        const messages=await Message.find({
+            conversationId:conversationId,
+        })
+        
+        return res.status(200).json({
+            message: "Messages fetched successfully",
+            data:messages
+        });
+    } catch (error) {
+        return res.status(400).json({
+            message:"Something went wrong",
+            error:error.message
+        })
+    }
+});
 module.exports = messageRoutes;
