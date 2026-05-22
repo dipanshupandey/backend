@@ -1,6 +1,5 @@
 const express = require("express");
 const connectDB = require("./config/database")
-const app = express();
 const cookieParser = require("cookie-parser");
 const requestRouter=require("./routes/requestRoutes");
 const profileRouter=require("./routes/profileRoutes");
@@ -9,7 +8,10 @@ const userRouter= require("./routes/userRoutes");
 const conversationRouter=require("./routes/conversationRoutes");
 const messageRoutes=require("./routes/messageRoutes");
 const cors=require("cors");
+const http=require("http");
+const {Server}=require("socket.io");
 
+const app = express();
 app.use(cors({
     origin:"http://localhost:5173",
     credentials:true
@@ -23,11 +25,30 @@ app.use("/",requestRouter);
 app.use("/",userRouter);
 app.use("/",conversationRouter);
 app.use("/",messageRoutes);
+const server=http.createServer(app);
+const io=new Server(server,{
+    cors:{
+        origin:"http://localhost:5173",
+        credentials:true,
+    }
+});
 
- 
+io.on("connection",(socket)=>{
+    console.log("connection Established",socket.id);
+    socket.on("send_message",(data)=>{
+        console.log("message received",data);
+        io.emit("message read",data);
+    });
+  
+    socket.on("disconnect",()=>{
+        console.log("disconnected",socket.id);
+    })
+});
+
+
 connectDB().then(() => {
     console.log("database connected successfully");
-    app.listen(5050, () => {
+    server.listen(5050, () => {
         console.log("server listening on port 5050");
     })
 }).catch((err) => {

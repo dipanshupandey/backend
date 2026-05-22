@@ -59,15 +59,18 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
 
 messageRoutes.get('/api/conversations/:conversationId/messages', userAuth, async (req, res) => {
     try {
+        
         const {conversationId} = req.params;
         const userId=req.user._id;
         if (!conversationId || !ObjectId.isValid(conversationId)) {
             throw new Error("Conversation not valid!");
         }
+        
         const conversation = await Conversation.findById(conversationId);
         if (!conversation) {
             throw new Error("No conversation!");
         }
+        
         const isParticipant=conversation.participants.some((participant)=>participant.equals(userId));
         if(!isParticipant)
         {
@@ -75,7 +78,7 @@ messageRoutes.get('/api/conversations/:conversationId/messages', userAuth, async
         }
         const messages=await Message.find({
             conversationId:conversationId,
-        })
+        }).sort({createdAt:1});
         
         return res.status(200).json({
             message: "Messages fetched successfully",
