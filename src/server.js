@@ -10,6 +10,7 @@ const messageRoutes=require("./routes/messageRoutes");
 const cors=require("cors");
 const http=require("http");
 const {Server}=require("socket.io");
+const {initSocket}=require("./socket/socket");
 
 const app = express();
 app.use(cors({
@@ -26,25 +27,13 @@ app.use("/",userRouter);
 app.use("/",conversationRouter);
 app.use("/",messageRoutes);
 const server=http.createServer(app);
-const io=new Server(server,{
-    cors:{
-        origin:"http://localhost:5173",
-        credentials:true,
-    }
-});
+const io=initSocket(server);
 
 io.on("connection",(socket)=>{
     console.log("connection Established",socket.id);
     socket.on("join conversation",(conversationId)=>{
         socket.join(conversationId);
         console.log(`Socket ${socket.id} joined room: ${conversationId}`);
-    });
-    socket.on("send message",(data)=>{
-        console.log("message received",data);
-        if(data?.conversationId)
-        {
-            io.to(data.conversationId).emit("message read",data);
-        }
     });
   
     socket.on("disconnect",()=>{

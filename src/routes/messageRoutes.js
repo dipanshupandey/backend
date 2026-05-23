@@ -6,7 +6,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const Conversation = require("../models/conversation");
 const Message = require("../models/message");
 const message = require('../models/message');
-
+const { getIO } = require('../socket/socket');
 
 async function validateMessageRequest(conversationId, senderId, text) {
     if (!text?.trim() || !conversationId) {
@@ -44,6 +44,8 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
         conversation.lastMessage = text;
         conversation.lastMessageAt = Date.now();
         await conversation.save();
+        const io = getIO();
+        io.to(conversationId).emit("message:new", data);
         return res.status(201).json({
             message: "Message sent",
             data
