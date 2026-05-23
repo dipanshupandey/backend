@@ -35,9 +35,16 @@ const io=new Server(server,{
 
 io.on("connection",(socket)=>{
     console.log("connection Established",socket.id);
-    socket.on("send_message",(data)=>{
+    socket.on("join conversation",(conversationId)=>{
+        socket.join(conversationId);
+        console.log(`Socket ${socket.id} joined room: ${conversationId}`);
+    });
+    socket.on("send message",(data)=>{
         console.log("message received",data);
-        io.emit("message read",data);
+        if(data?.conversationId)
+        {
+            io.to(data.conversationId).emit("message read",data);
+        }
     });
   
     socket.on("disconnect",()=>{
