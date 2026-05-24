@@ -9,9 +9,8 @@ const conversationRouter=require("./routes/conversationRoutes");
 const messageRoutes=require("./routes/messageRoutes");
 const cors=require("cors");
 const http=require("http");
-const {Server}=require("socket.io");
 const {initSocket}=require("./socket/socket");
-const socketAuth=require("./middlewares/socketAuth");
+const {socketAuth,canJoinConversation}=require("./middlewares/socketAuth");
 
 const app = express();
 app.use(cors({
@@ -34,18 +33,34 @@ const io=initSocket(server);
 io.use(socketAuth);
 
 
-io.on("connection",(socket)=>{
-    console.log("connection Established",socket.id);
-    socket.on("join conversation",(conversationId)=>{
-        socket.join(conversationId);
-        console.log(`Socket ${socket.id} joined room: ${conversationId}`);
-    });
-  
-    socket.on("disconnect",()=>{
-        console.log("disconnected",socket.id);
-    })
-});
+io.on("connection", (socket) => {
 
+    console.log("connection Established", socket.id);
+
+    socket.on("join conversation", async (conversationId) => {
+
+        const canJoin = await canJoinConversation(
+            conversationId,
+            socket.user._id
+        );
+
+        if (!canJoin) {
+            console.log(`Socket ${socket.id} attempted to join conversation ${conversationId} but was denied access.`);
+            return;
+        }
+
+        socket.join(conversationId);
+
+        console.log(
+          `Socket ${socket.id} joined room: ${conversationId}`
+        );
+    });
+
+    socket.on("disconnect", () => {
+        console.log("disconnected", socket.id);
+    });
+
+});
 
 connectDB().then(() => {
     console.log("database connected successfully");
