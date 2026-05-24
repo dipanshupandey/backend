@@ -11,6 +11,7 @@ const cors=require("cors");
 const http=require("http");
 const {Server}=require("socket.io");
 const {initSocket}=require("./socket/socket");
+const socketAuth=require("./middlewares/socketAuth");
 
 const app = express();
 app.use(cors({
@@ -26,8 +27,12 @@ app.use("/",requestRouter);
 app.use("/",userRouter);
 app.use("/",conversationRouter);
 app.use("/",messageRoutes);
+
+
 const server=http.createServer(app);
 const io=initSocket(server);
+io.use(socketAuth);
+
 
 io.on("connection",(socket)=>{
     console.log("connection Established",socket.id);
