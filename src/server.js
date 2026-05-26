@@ -32,7 +32,7 @@ const server=http.createServer(app);
 const io=initSocket(server);
 io.use(socketAuth);
 
-
+let selectedConversationId=null;
 io.on("connection", (socket) => {
 
     console.log("connection Established", socket.id);
@@ -50,7 +50,7 @@ io.on("connection", (socket) => {
         }
 
         socket.join(conversationId);
-
+        selectedConversationId = conversationId;
         console.log(
           `Socket ${socket.id} joined room: ${conversationId}`
         );
