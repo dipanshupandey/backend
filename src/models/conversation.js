@@ -28,6 +28,11 @@ const conversationSchema = new Schema({
     conversationKey:{
         type:String,
         unique:true
+    },
+    unreadCount:{
+        type: Map,
+        of: Number,
+        default: {}
     }
 }, {
     timestamps: true

@@ -11,6 +11,7 @@ const cors=require("cors");
 const http=require("http");
 const {initSocket}=require("./socket/socket");
 const {socketAuth,canJoinConversation}=require("./middlewares/socketAuth");
+const activeConversations=require("./utils/activeConversations");
 
 const app = express();
 app.use(cors({
@@ -32,7 +33,7 @@ const server=http.createServer(app);
 const io=initSocket(server);
 io.use(socketAuth);
 
-let selectedConversationId=null;
+
 io.on("connection", (socket) => {
 
     console.log("connection Established", socket.id);
@@ -50,7 +51,7 @@ io.on("connection", (socket) => {
         }
 
         socket.join(conversationId);
-        selectedConversationId = conversationId;
+        activeConversations.set(socket.user._id.toString(),conversationId);
         console.log(
           `Socket ${socket.id} joined room: ${conversationId}`
         );
@@ -58,6 +59,7 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         console.log("disconnected", socket.id);
+        activeConversations.delete(socket.user._id.toString());
     });
 
 });

@@ -7,6 +7,7 @@ const Conversation = require("../models/conversation");
 const Message = require("../models/message");
 const message = require('../models/message');
 const { getIO } = require('../socket/socket');
+const activeConversations = require('../utils/activeConversations');
 
 async function validateMessageRequest(conversationId, senderId, text) {
     if (!text?.trim() || !conversationId) {
@@ -43,6 +44,11 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
 
         conversation.lastMessage = text;
         conversation.lastMessageAt = Date.now();
+        const receiverId=conversation.participants[0].equals(senderId)?conversation.participants[1]:conversation.participants[0];
+        if(activeConversations.get(receiverId.toString())!==conversationId){
+            const currentUnreadCount=conversation.unreadCount.get(receiverId.toString())||0;
+            conversation.unreadCount.set(receiverId.toString(),currentUnreadCount+1);
+        }
         await conversation.save();
         const io = getIO();
         io.to(conversationId).emit("message:new", data);
