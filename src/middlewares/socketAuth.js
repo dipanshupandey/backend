@@ -44,7 +44,7 @@ const canJoinConversation=async (conversationId,userId)=>{
     const isParticipant=conversation.participants.some(participant=>{
         return participant.equals(userId)
     })
-    return isParticipant;
+    return {isParticipant,conversation};
 
 }
 module.exports={

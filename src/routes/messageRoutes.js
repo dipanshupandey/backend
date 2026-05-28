@@ -49,6 +49,7 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
             const currentUnreadCount=conversation.unreadCount.get(receiverId.toString())||0;
             conversation.unreadCount.set(receiverId.toString(),currentUnreadCount+1);
         }
+        console.log("conversation after update",conversation);
         await conversation.save();
         const io = getIO();
         io.to(conversationId).emit("message:new", data);
