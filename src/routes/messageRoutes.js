@@ -44,18 +44,25 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
 
         conversation.lastMessage = text;
         conversation.lastMessageAt = Date.now();
-        const receiverId=conversation.participants[0].equals(senderId)?conversation.participants[1]:conversation.participants[0];
-        if(activeConversations.get(receiverId.toString())!==conversationId){
-            const currentUnreadCount=conversation.unreadCount.get(receiverId.toString())||0;
-            conversation.unreadCount.set(receiverId.toString(),currentUnreadCount+1);
+        const receiverId = conversation.participants[0].equals(senderId) ? conversation.participants[1] : conversation.participants[0];
+        if (activeConversations.get(receiverId.toString()) !== conversationId) {
+            const currentUnreadCount = conversation.unreadCount.get(receiverId.toString()) || 0;
+            conversation.unreadCount.set(receiverId.toString(), currentUnreadCount + 1);
         }
-        console.log("conversation after update",conversation);
+        console.log("conversation after update", conversation);
         await conversation.save();
         const io = getIO();
-        io.to(conversationId).emit("message:new", data);
+        io.to(conversationId).emit("message:new", {
+            message: data,
+            conversationId,
+            unreadCount:
+                conversation.unreadCount.get(receiverId.toString()) || 0,
+            receiverId: receiverId.toString()
+        });
+
         return res.status(201).json({
             message: "Message sent",
-            data
+            data,
         });
 
     } catch (error) {
@@ -68,35 +75,34 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
 
 messageRoutes.get('/api/conversations/:conversationId/messages', userAuth, async (req, res) => {
     try {
-        
-        const {conversationId} = req.params;
-        const userId=req.user._id;
+
+        const { conversationId } = req.params;
+        const userId = req.user._id;
         if (!conversationId || !ObjectId.isValid(conversationId)) {
             throw new Error("Conversation not valid!");
         }
-        
+
         const conversation = await Conversation.findById(conversationId);
         if (!conversation) {
             throw new Error("No conversation!");
         }
-        
-        const isParticipant=conversation.participants.some((participant)=>participant.equals(userId));
-        if(!isParticipant)
-        {
+
+        const isParticipant = conversation.participants.some((participant) => participant.equals(userId));
+        if (!isParticipant) {
             throw new Error("Unauthorized!");
         }
-        const messages=await Message.find({
-            conversationId:conversationId,
-        }).sort({createdAt:1});
-        
+        const messages = await Message.find({
+            conversationId: conversationId,
+        }).sort({ createdAt: 1 });
+
         return res.status(200).json({
             message: "Messages fetched successfully",
-            data:messages
+            data: messages
         });
     } catch (error) {
         return res.status(400).json({
-            message:"Something went wrong",
-            error:error.message
+            message: "Something went wrong",
+            error: error.message
         })
     }
 });
