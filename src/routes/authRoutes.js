@@ -58,7 +58,7 @@ authRouter.post("/user/login", async (req, res) => {
         });
         const userObject=user.toObject();
         delete userObject.password
-        return res.json({message:"Login successfull",data:user});
+        return res.json({message:"Login successfull",data:userObject});
     } catch (error) {
         res.status(401).json({
             message:"invalid credentials",

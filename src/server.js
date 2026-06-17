@@ -12,6 +12,7 @@ const http = require("http");
 const { initSocket } = require("./socket/socket");
 const { socketAuth, canJoinConversation } = require("./middlewares/socketAuth");
 const activeConversations = require("./utils/activeConversations");
+const onlineUsers=require("./utils/onlineUsers");
 
 const app = express();
 app.use(cors({
@@ -37,7 +38,11 @@ io.use(socketAuth);
 io.on("connection", (socket) => {
 
     console.log("connection Established", socket.id);
-
+    const userId=socket.user._id.toString();
+    if(!onlineUsers.has(userId)){
+        onlineUsers.set(userId, new Set());
+    }
+    onlineUsers.get(userId).add(socket.id);
     socket.on("join conversation", async (conversationId) => {
 
         const { isParticipant, conversation } = await canJoinConversation(
@@ -63,10 +68,27 @@ io.on("connection", (socket) => {
             `Socket ${socket.id} joined room: ${conversationId}`
         );
     });
+    socket.on("getOnlineStatus",(userId2,()=>{
+        if(!userId2)
+        {
+            socket.emit("onlineStatus",{userId2:null,isOnline:false});
+        }
+        const USERID=userId2.toString();
+        const isOnline=onlineUsers.has(USERID) && onlineUsers.get(USERID).size>0;
+        socket.emit("onlineStatus",{userId2,isOnline});
+    }))
 
     socket.on("disconnect", () => {
         console.log("disconnected", socket.id);
         activeConversations.delete(socket.user._id.toString());
+        if(onlineUsers.has(userId))
+        {
+        onlineUsers.get(userId).delete(socket.id);
+        if(onlineUsers.get(userId).size===0)
+        {
+            onlineUsers.delete(userId);
+        }
+        }
     });
 
 });
