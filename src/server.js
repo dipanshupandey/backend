@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
         onlineUsers.set(userId, new Set());
     }
     onlineUsers.get(userId).add(socket.id);
+    socket.broadcast.emit("onlineStatus", true);
     socket.on("join conversation", async (conversationId) => {
 
         const { isParticipant, conversation } = await canJoinConversation(
@@ -68,15 +69,6 @@ io.on("connection", (socket) => {
             `Socket ${socket.id} joined room: ${conversationId}`
         );
     });
-    socket.on("getOnlineStatus",(userId2,()=>{
-        if(!userId2)
-        {
-            socket.emit("onlineStatus",{userId2:null,isOnline:false});
-        }
-        const USERID=userId2.toString();
-        const isOnline=onlineUsers.has(USERID) && onlineUsers.get(USERID).size>0;
-        socket.emit("onlineStatus",{userId2,isOnline});
-    }))
 
     socket.on("disconnect", () => {
         console.log("disconnected", socket.id);
@@ -87,8 +79,10 @@ io.on("connection", (socket) => {
         if(onlineUsers.get(userId).size===0)
         {
             onlineUsers.delete(userId);
+            socket.broadcast.emit("user:statusChanged", { userId, isOnline: false });
         }
         }
+        
     });
 
 });
