@@ -44,6 +44,13 @@ io.on("connection", (socket) => {
     }
     onlineUsers.get(userId).add(socket.id);
     socket.broadcast.emit("onlineStatus", true);
+    socket.on("getOnlineStatus", (id) => {
+        if (onlineUsers.has(id)&& onlineUsers.get(id).size > 0) {
+            socket.emit("onlineStatus", true);
+        } else {
+            socket.emit("onlineStatus", false);
+        }
+    });
     socket.on("join conversation", async (conversationId) => {
 
         const { isParticipant, conversation } = await canJoinConversation(
