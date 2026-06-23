@@ -39,6 +39,8 @@ io.on("connection", (socket) => {
 
     console.log("connection Established", socket.id);
     const userId=socket.user._id.toString();
+    activeConversations.set(userId, null);
+    console.log("activeConversations after connection", activeConversations);
     if(!onlineUsers.has(userId)){
         onlineUsers.set(userId, new Set());
     }
@@ -69,6 +71,7 @@ io.on("connection", (socket) => {
         }
 
         conversation.unreadCount.set(socket.user._id.toString(), 0);
+        socket.emit("conversation:joined",{conversationId,unreadCount:0,userId:socket?.user._id?.toString()});
         await conversation.save();
         console.log("conversation after reset unread count", conversation);
         activeConversations.set(socket.user._id.toString(), conversationId);
