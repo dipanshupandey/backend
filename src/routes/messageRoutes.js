@@ -82,10 +82,12 @@ messageRoutes.post('/api/conversations/:conversationId/messages', userAuth, asyn
 });
 
 messageRoutes.get('/api/conversations/:conversationId/messages', userAuth, async (req, res) => {
-    try {
-
+        const pageSize=parseInt(req.query.limit)||30;
+        const cursor=req.query.cursor||null;
         const { conversationId } = req.params;
         const userId = req.user._id;
+
+    try {
         if (!conversationId || !ObjectId.isValid(conversationId)) {
             throw new Error("Conversation not valid!");
         }
@@ -99,9 +101,25 @@ messageRoutes.get('/api/conversations/:conversationId/messages', userAuth, async
         if (!isParticipant) {
             throw new Error("Unauthorized!");
         }
+
+        let query={conversationId: new ObjectId(conversationId)};
+
+        if(cursor){
+            const decodedCursor=JSON.parse(Buffer.from(cursor,'base64')).toString();
+            query.$or=[
+                {
+                    createdAt:{$lt:new Date(decodedCursor.createdAt)},
+                },
+                {
+                    createdAt:{$eq:new Date(decodedCursor.createdAt)},
+                    id:{$lt:new ObjectId(decodedCursor._id)}
+                }
+            ]
+        }
         const messages = await Message.find({
             conversationId: conversationId,
-        }).sort({ createdAt: 1 });
+        }).sort({ createdAt: 1 ,_id:1}).limit(31);
+        const hasmore = messages.length > 30;
 
         return res.status(200).json({
             message: "Messages fetched successfully",
