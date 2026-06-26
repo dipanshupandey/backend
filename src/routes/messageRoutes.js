@@ -105,25 +105,37 @@ messageRoutes.get('/api/conversations/:conversationId/messages', userAuth, async
         let query={conversationId: new ObjectId(conversationId)};
 
         if(cursor){
-            const decodedCursor=JSON.parse(Buffer.from(cursor,'base64')).toString();
+            const decodedCursor=JSON.parse(Buffer.from(cursor,'base64').toString());
             query.$or=[
                 {
                     createdAt:{$lt:new Date(decodedCursor.createdAt)},
                 },
                 {
                     createdAt:{$eq:new Date(decodedCursor.createdAt)},
-                    id:{$lt:new ObjectId(decodedCursor._id)}
+                    _id:{$lt:new ObjectId(decodedCursor._id)}
                 }
             ]
         }
-        const messages = await Message.find({
-            conversationId: conversationId,
-        }).sort({ createdAt: 1 ,_id:1}).limit(31);
-        const hasmore = messages.length > 30;
-
+        const messages = await Message.find(query).sort({ createdAt: -1 ,_id:-1}).limit(pageSize+1);
+        const hasMore = messages.length > pageSize;
+        if(hasMore){
+            messages.pop();
+        }
+        const item=messages.reverse();
+        let nextCursor=null;
+        if(hasMore&&item.length>0){
+            const oldestItem=item[0];
+            nextCursor=Buffer.from(
+                JSON.stringify({
+                    createdAt:oldestItem.createdAt,
+                    _id:oldestItem._id
+                })).toString("base64");
+        }
         return res.status(200).json({
             message: "Messages fetched successfully",
-            data: messages
+            data: item,
+            nextCursor,
+            hasMore
         });
     } catch (error) {
         return res.status(400).json({
