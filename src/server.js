@@ -26,12 +26,21 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+app.use("/user/signup",authLimiter);
+app.use("/user/login",authLimiter);
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", conversationRouter);
 app.use("/", messageRoutes);
+
+app.use((err,req,res,next)=>{
+console.log(err.stack);
+res.status(err.status||500).json({
+    message:err.message||"Something went wrong"
+});
+});
 
 
 const server = http.createServer(app);
@@ -104,7 +113,7 @@ io.on("connection", (socket) => {
 connectDB().then(() => {
     console.log("database connected successfully");
     server.listen(process.env.PORT||5050, () => {
-        console.log("server listening on port 5050");
+        console.log(`server listening on port ${process.env.PORT}`);
     })
 }).catch((err) => {
     console.log("database can not be connected", err);
