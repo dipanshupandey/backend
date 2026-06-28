@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/database")
 const cookieParser = require("cookie-parser");
@@ -13,10 +14,13 @@ const { initSocket } = require("./socket/socket");
 const { socketAuth, canJoinConversation } = require("./middlewares/socketAuth");
 const activeConversations = require("./utils/activeConversations");
 const onlineUsers=require("./utils/onlineUsers");
+const helmet=require("helmet");
+const authLimiter=require("./utils/rateLimiter");
 
 const app = express();
+app.use(helmet());
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_ORIGIN,
     credentials: true
 }));
 
@@ -99,7 +103,7 @@ io.on("connection", (socket) => {
 
 connectDB().then(() => {
     console.log("database connected successfully");
-    server.listen(5050, () => {
+    server.listen(process.env.PORT||5050, () => {
         console.log("server listening on port 5050");
     })
 }).catch((err) => {

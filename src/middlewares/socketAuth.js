@@ -14,7 +14,7 @@ const socketAuth=async(socket,next)=>{
         if(!token){
             return next(new Error("Authentication error: Token not provided"));
         }
-        const decoded=jwt.verify(token,"MyServerSecret@003");
+        const decoded=jwt.verify(token,process.env.JWT_SECRET);
         console.log(decoded);
         const user=await User.findById(decoded.id);
         if(!user){

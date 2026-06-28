@@ -9,7 +9,7 @@ const userAuth = async (req, res, next) => {
             return res.status(401).json({ error: "Please login!" });
         }
         // console.log(token);
-        const decoded = JWT.verify(token, "MyServerSecret@003");
+        const decoded = JWT.verify(token, process.env.JWT_SECRET);
         const Id = decoded.id;
         const fetchedUser = await User.findById(Id);
         if (!fetchedUser )

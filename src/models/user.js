@@ -82,7 +82,7 @@ userSchema.methods.getJWT=function (){
     const token=JWT.sign({
         id:user._id
     },
-    "MyServerSecret@003",
+    process.env.JWT_SECRET,
     {
         expiresIn:"7d"
     }
